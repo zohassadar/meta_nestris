@@ -77,6 +77,31 @@ impl Piece {
 
         COUNTERCLOCKWISE_ROTATIONS[self as usize]
     }
+    #[must_use]
+    pub fn get_tile(self) -> u8 {
+        const TILES: [u8; 19] = [
+            0x7b,
+            0x7b,
+            0x7b,
+            0x7b,
+            0x7d,
+            0x7d,
+            0x7d,
+            0x7d,
+            0x7c,
+            0x7c,
+            0x7b,
+            0x7d,
+            0x7d,
+            0x7c,
+            0x7c,
+            0x7c,
+            0x7c,
+            0x7b,
+            0x7b,
+        ];
+        TILES[self as usize]
+    }
 
     #[must_use]
     pub fn get_tile_offsets(self) -> &'static [(i8, i8); 4] {
