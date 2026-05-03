@@ -30,7 +30,7 @@ pub struct GameplayState<const MODIFIER: Modifier> {
     pub drop_autorepeat: i8, // $6e
     pub shift_autorepeat: u8, // $66
     pub game_type: GameType, // $c1
-    pub tiles: [Tile; 0x100], // $400-$4ff
+    pub tiles: [Option<Tile>; 0x100], // $400-$4ff
     pub current_piece: Piece, // $62
     pub next_piece: Piece, // $bf
     pub score: u32,   // $73-$75
@@ -116,7 +116,7 @@ impl<const MODIFIER: Modifier> GameplayState<MODIFIER> {
             },
             play_state: PlayState::MoveTetrimino,
             shift_autorepeat: 15,
-            tiles: [Tile::Empty; 0x100],
+            tiles: [None; 0x100],
             level,
             hold_down_points: 0,
             checked_row_offset: 0,
@@ -140,11 +140,11 @@ impl<const MODIFIER: Modifier> GameplayState<MODIFIER> {
     }
 
     #[must_use]
-    pub fn get_tile(&self, x: usize, y: usize) -> Tile {
-        self.tiles[y * 10 + x]
+    pub fn get_tile(&self, x: usize, y: usize) -> Option<Tile> {
+        Some(self.tiles[y * 10 + x]?)
     }
 
-    fn set_tile(&mut self, x: usize, y: usize, tile: Tile) {
+    fn set_tile(&mut self, x: usize, y: usize, tile: Option<Tile>) {
         self.tiles[y * 10 + x] = tile;
     }
 
@@ -279,7 +279,7 @@ impl<const MODIFIER: Modifier> GameplayState<MODIFIER> {
         let checked_row_start_index = usize::from(checked_row) * 10;
         if self.tiles[checked_row_start_index..checked_row_start_index + 10]
             .iter()
-            .all(|t| t != &Tile::Empty)
+            .all(|t| t.is_some())
         {
             // move tiles down
             let moved_tiles = if checked_row > 0 {
@@ -290,7 +290,7 @@ impl<const MODIFIER: Modifier> GameplayState<MODIFIER> {
                     // are never read in 1-player mode
             };
             self.tiles.copy_within(0..usize::from(moved_tiles), 10);
-            self.tiles[..10].fill(Tile::Empty);
+            self.tiles[..10].fill(None);
 
             self.cleared_lines += 1;
         }
@@ -437,7 +437,7 @@ impl<const MODIFIER: Modifier> GameplayState<MODIFIER> {
                 }
             }
 
-            if self.get_tile(tile_x, tile_y) != Tile::Empty {
+            if self.get_tile(tile_x, tile_y).is_some() {
                 return false;
             }
         }
@@ -545,15 +545,15 @@ impl<const MODIFIER: Modifier> GameplayState<MODIFIER> {
 
     fn initialize_type_b_tiles(&mut self, height_index: u8) {
         const B_TYPE_HEIGHTS: [u8; 6] = [20, 17, 15, 12, 10, 8];
-        const B_TYPE_RNG_TABLE: [Tile; 8] = [
-            Tile::Empty,
-            Tile::IOT,
-            Tile::Empty,
-            Tile::LZ,
-            Tile::JS,
-            Tile::JS,
-            Tile::Empty,
-            Tile::Empty,
+        const B_TYPE_RNG_TABLE: [Option<Tile>; 8] = [
+            None,
+            Some(Tile::IOT),
+            None,
+            Some(Tile::LZ),
+            Some(Tile::JS),
+            Some(Tile::JS),
+            None,
+            None,
         ];
 
         for y in 8..20 {
@@ -572,12 +572,12 @@ impl<const MODIFIER: Modifier> GameplayState<MODIFIER> {
             // guarantee a hole in the row
             self.random.cycle_do_while(|v| v % 16 >= 10);
             let x = usize::from(self.random.get_value() % 16);
-            self.set_tile(x, y, Tile::Empty);
+            self.set_tile(x, y, None);
         }
 
         // behavior from the base game: one additional tile (leftmost tile of the
         // highest garbage row) is also cleared
         let tiles_to_clear = usize::from(B_TYPE_HEIGHTS[usize::from(height_index)]) * 10 + 1;
-        self.tiles[..tiles_to_clear].fill(Tile::Empty);
+        self.tiles[..tiles_to_clear].fill(None);
     }
 }

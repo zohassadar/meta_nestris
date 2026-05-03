@@ -24,10 +24,9 @@ pub enum Piece {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Tile {
-    Empty = 0xef,
-    IOT = 0x7b,
-    LZ = 0x7c,
-    JS = 0x7d,
+    IOT,
+    LZ,
+    JS,
 }
 
 impl Piece {
@@ -86,7 +85,7 @@ impl Piece {
         COUNTERCLOCKWISE_ROTATIONS[self as usize]
     }
     #[must_use]
-    pub fn get_tile(self) -> Tile {
+    pub fn get_tile(self) -> Option<Tile> {
         const TILES: [Tile; 19] = [
             Tile::IOT,
             Tile::IOT,
@@ -108,7 +107,7 @@ impl Piece {
             Tile::IOT,
             Tile::IOT,
         ];
-        TILES[self as usize]
+        Some(TILES[self as usize])
     }
 
     #[must_use]
