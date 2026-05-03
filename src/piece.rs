@@ -22,6 +22,14 @@ pub enum Piece {
     None = 19,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Tile {
+    Empty = 0xef,
+    IOT = 0x7b,
+    LZ = 0x7c,
+    JS = 0x7d,
+}
+
 impl Piece {
     #[must_use]
     pub fn get_clockwise_rotation(self) -> Self {
@@ -78,27 +86,27 @@ impl Piece {
         COUNTERCLOCKWISE_ROTATIONS[self as usize]
     }
     #[must_use]
-    pub fn get_tile(self) -> u8 {
-        const TILES: [u8; 19] = [
-            0x7b,
-            0x7b,
-            0x7b,
-            0x7b,
-            0x7d,
-            0x7d,
-            0x7d,
-            0x7d,
-            0x7c,
-            0x7c,
-            0x7b,
-            0x7d,
-            0x7d,
-            0x7c,
-            0x7c,
-            0x7c,
-            0x7c,
-            0x7b,
-            0x7b,
+    pub fn get_tile(self) -> Tile {
+        const TILES: [Tile; 19] = [
+            Tile::IOT,
+            Tile::IOT,
+            Tile::IOT,
+            Tile::IOT,
+            Tile::JS,
+            Tile::JS,
+            Tile::JS,
+            Tile::JS,
+            Tile::LZ,
+            Tile::LZ,
+            Tile::IOT,
+            Tile::JS,
+            Tile::JS,
+            Tile::LZ,
+            Tile::LZ,
+            Tile::LZ,
+            Tile::LZ,
+            Tile::IOT,
+            Tile::IOT,
         ];
         TILES[self as usize]
     }
